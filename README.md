@@ -107,6 +107,6 @@ Contributions to improve the configuration and performance of the reverse proxy 
 
 ## Contact Information
 
-For any issues or questions, you can contact the project maintainer at: saengsaichaiyo@gmail.con .
+For any issues or questions, you can contact the project maintainer at: saengsaichaiyo@gmail.com.
 ```
 
