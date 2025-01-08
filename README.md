@@ -1,7 +1,4 @@
-<<<<<<< HEAD
- Hi there 👋
-=======
->>>>>>> 5c84e16a058414877efee3c2f76bde5cde275027
+
 
 
 ```markdown
