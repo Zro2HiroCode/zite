@@ -1,4 +1,7 @@
+<<<<<<< HEAD
  Hi there 👋
+=======
+>>>>>>> 5c84e16a058414877efee3c2f76bde5cde275027
 
 
 ```markdown
@@ -108,6 +111,6 @@ Contributions to improve the configuration and performance of the reverse proxy 
 
  Contact Information
 
-For any issues or questions, you can contact the project maintainer at: saengsaichaiyo@gmail.con .
+For any issues or questions, you can contact the project maintainer at: saengsaichaiyo@gmail.com.
 ```
 
