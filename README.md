@@ -9,7 +9,7 @@ This project demonstrates the setup of a Reverse Proxy and Load Balancer system 
 
  Prerequisites
 Before proceeding, ensure the following software is installed on all VMs:
-- Ubuntu 20.04 or later
+- Ubuntu 24.04 or later
 - Nginx (for Reverse Proxy and Load Balancer)
 - Apache2 (for backend API handling)
 - PHP and MySQL (on backend servers)
