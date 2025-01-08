@@ -1,7 +1,5 @@
 
 
-
-```markdown
  Reverse Proxy and Load Balancer Project
 
  Description
