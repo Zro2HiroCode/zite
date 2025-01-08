@@ -96,10 +96,8 @@ Before proceeding, ensure the following software is installed on all VMs:
  Contributing
 
 Contributions to improve the configuration and performance of the reverse proxy and load balancing setup are welcome. To contribute:
-1. Fork the repository.
-2. Create a new branch.
-3. Make your changes and commit them.
-4. Open a pull request.
+
+
 
  License
 
