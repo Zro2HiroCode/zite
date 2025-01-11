@@ -3,37 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reverse Proxy และ Load Balancer</title>
+    <title>การตั้งค่า Nginx และ Apache2</title>
     <style>
+        /* ลดระยะห่างระหว่างบรรทัดและองค์ประกอบต่าง ๆ */
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
+            line-height: 1.4;
+            margin: 0;
+            padding: 0;
         }
-        h1, h2 {
-            color: #2C3E50;
-        }
-        h3 {
-            color: #34495E;
-        }
-        p {
-            line-height: 1.6;
-        }
-        code {
-            background-color: #f4f4f4;
-            padding: 0.5em;
-            border-radius: 5px;
-        }
+
         .section {
-            margin-bottom: 20px;
+            margin-bottom: 10px; /* เพิ่มระยะห่างระหว่าง section */
+            padding: 5px;
         }
-        .important {
-            background-color: #f9f9f9;
+
+        h2 {
+            margin-top: 0;
+            margin-bottom: 5px; /* ลดระยะห่างใต้ h2 */
+            font-size: 1.5rem;
+            color: #333;
+        }
+
+        pre {
+            margin-top: 0;
+            margin-bottom: 10px; /* เพิ่มระยะห่างระหว่างคำสั่ง */
             padding: 10px;
-            border-left: 5px solid #2C3E50;
+            background-color: #f4f4f4;
+            font-family: monospace;
+            white-space: pre-wrap; /* แสดงข้อความใน pre ตามบรรทัด */
+            border-radius: 5px;
+            line-height: 1.4; /* ปรับระยะห่างระหว่างบรรทัดใน pre */
         }
-        .step {
-            margin-left: 20px;
+
+        ul {
+            margin-top: 0;
+            padding-left: 20px;
+            list-style-type: disc;
         }
+
+        li {
+            margin-bottom: 5px; /* ลดระยะห่างระหว่างรายการใน ul */
+        }
+
+        .important {
+            font-weight: bold;
+            color: #d9534f; /* เปลี่ยนสีให้เน้นข้อความที่สำคัญ */
+        }
+
+        p {
+            line-height: 1.5;
+            margin-bottom: 10px; /* เพิ่มระยะห่างหลังข้อความ */
+        }
+      
     </style>
 </head>
 <body>
@@ -221,24 +243,28 @@ server {
     }
 }
 
-<div class="section">
-        <h2>ทดสอบการตั้งค่า Nginx:</h2>
-        <pre>sudo nginx -t</pre>
-        <h2>รีโหลด Nginx:</h2>
-        <pre>sudo systemctl reload nginx</pre>
+    <!-- เนื้อหาของเว็บไซต์ -->
+    <div class="section">
+        <h2>ทดสอบการตั้งค่า Nginx</h2>
+        <pre>
+sudo nginx -t
+        </pre>
+        <h2>รีโหลด Nginx</h2>
+        <pre>
+sudo systemctl reload nginx
+        </pre>
     </div>
 
     <div class="section">
         <h2>การตรวจสอบการทำงาน</h2>
-
         <ul>
-            <li><span class="important">ตรวจสอบสถานะของ Apache2:</span>
+            <li>ตรวจสอบสถานะของ Apache2:
                 <pre>sudo systemctl status apache2</pre>
             </li>
-            <li><span class="important">ตรวจสอบสถานะของ Nginx:</span>
+            <li>ตรวจสอบสถานะของ Nginx:
                 <pre>sudo systemctl status nginx</pre>
             </li>
-            <li><span class="important">ทดสอบการเข้าถึง MySQL จากเครื่อง "rp" ไปยัง "backend-data":</span>
+            <li>ทดสอบการเข้าถึง MySQL จากเครื่อง "rp" ไปยัง "backend-data":
                 <pre>mysql -u tcs -p -h 192.168.86.14</pre>
             </li>
         </ul>
@@ -252,12 +278,11 @@ server {
     <div class="section">
         <h2>การตั้งค่าเพิ่มเติม (หากจำเป็น)</h2>
         <ul>
-            <li><span class="important">เพิ่มการตรวจสอบสถานะเซิร์ฟเวอร์</span> เพื่อให้แน่ใจว่าเซิร์ฟเวอร์ Backend สามารถตอบสนองคำขอได้ตลอดเวลา โดยสามารถใช้เครื่องมือเช่น Nagios หรือ Zabbix สำหรับการมอนิเตอร์ระบบ</li>
-            <li><span class="important">เพิ่มการตั้งค่า SSL</span> เพื่อให้การสื่อสารระหว่างไคลเอนต์และเซิร์ฟเวอร์ปลอดภัยมากยิ่งขึ้น</li>
-            <li><span class="important">ปรับปรุงการตั้งค่าความปลอดภัยของฐานข้อมูล</span> เช่น การตั้งค่าการเข้าถึง MySQL ด้วยผู้ใช้ที่มีสิทธิ์จำกัด</li>
-            <li><span class="important">สำรองข้อมูล</span> ให้สม่ำเสมอเพื่อป้องกันข้อมูลสูญหายและเพิ่มความสามารถในการกู้คืนระบบในกรณีที่เกิดเหตุไม่คาดคิด</li>
+            <li>เพิ่มการตรวจสอบสถานะเซิร์ฟเวอร์ เพื่อให้แน่ใจว่าเซิร์ฟเวอร์ Backend สามารถตอบสนองคำขอได้ตลอดเวลา โดยสามารถใช้เครื่องมือเช่น Nagios หรือ Zabbix สำหรับการมอนิเตอร์ระบบ</li>
+            <li>เพิ่มการตั้งค่า SSL เพื่อให้การสื่อสารระหว่างไคลเอนต์และเซิร์ฟเวอร์ปลอดภัยมากยิ่งขึ้น</li>
+            <li>ปรับปรุงการตั้งค่าความปลอดภัยของฐานข้อมูล เช่น การตั้งค่าการเข้าถึง MySQL ด้วยผู้ใช้ที่มีสิทธิ์จำกัด</li>
+            <li>สำรองข้อมูลให้สม่ำเสมอเพื่อป้องกันข้อมูลสูญหายและเพิ่มความสามารถในการกู้คืนระบบในกรณีที่เกิดเหตุไม่คาดคิด</li>
         </ul>
     </div>
-
 </body>
 </html>
