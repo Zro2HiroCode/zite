@@ -1,143 +1,263 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>zro2hirocode's Development Branch</title>
+    <title>Apache2 vs Nginx Reverse Proxy และ Load Balancer</title>
     <style>
-        /* General Styles */
         body {
-            font-family: 'Courier New', Courier, monospace;
-            margin: 0;
-            padding: 0;
-            background-color: #1e1e2f;
-            color: #ffffff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            text-align: center;
+            font-family: Arial, sans-serif;
+            margin: 20px;
         }
-
-        h1 {
-            color: #4CAF50;
-            font-size: 3rem;
-            margin-bottom: 0.5rem;
-            text-shadow: 2px 2px 5px #000;
+        h1, h2 {
+            color: #2C3E50;
         }
-
+        h3 {
+            color: #34495E;
+        }
         p {
-            font-size: 1.2rem;
-            margin: 10px 0;
-            color: #b3b3cc;
+            line-height: 1.6;
         }
-
-        a {
-            color: #4CAF50;
-            text-decoration: none;
-            font-weight: bold;
+        code {
+            background-color: #f4f4f4;
+            padding: 0.5em;
+            border-radius: 5px;
         }
-
-        a:hover {
-            text-decoration: underline;
+        .section {
+            margin-bottom: 20px;
         }
-
-        /* Background Decoration */
-        .background {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle, #2a2a40, #1e1e2f);
-            z-index: -1;
+        .important {
+            background-color: #f9f9f9;
+            padding: 10px;
+            border-left: 5px solid #2C3E50;
         }
-
-        .branch {
-            position: absolute;
-            width: 4px;
-            height: 100px;
-            background-color: #4CAF50;
-            border-radius: 2px;
-            animation: grow 2s infinite alternate;
-        }
-
-        .branch:nth-child(1) {
-            top: 10%;
-            left: 20%;
-        }
-
-        .branch:nth-child(2) {
-            top: 40%;
-            left: 50%;
-            height: 120px;
-        }
-
-        .branch:nth-child(3) {
-            top: 70%;
-            left: 80%;
-            height: 80px;
-        }
-
-        @keyframes grow {
-            from {
-                transform: scaleY(0.8);
-            }
-            to {
-                transform: scaleY(1.2);
-            }
-        }
-
-        /* Decorative Binary Code */
-        .binary-code {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        .binary-code span {
-            position: absolute;
-            top: -100px;
-            font-size: 16px;
-            color: rgba(255, 255, 255, 0.1);
-            animation: fall 5s linear infinite;
-        }
-
-        @keyframes fall {
-            to {
-                transform: translateY(120vh);
-            }
-        }
-
-        .binary-code span:nth-child(odd) {
-            color: rgba(255, 255, 255, 0.3);
+        .step {
+            margin-left: 20px;
         }
     </style>
 </head>
 <body>
-    <div class="background">
-        <div class="branch"></div>
-        <div class="branch"></div>
-        <div class="branch"></div>
-        <div class="binary-code">
-            <!-- Decorative binary numbers -->
-            <span style="left: 10%;">010101010101</span>
-            <span style="left: 30%;">110011001100</span>
-            <span style="left: 50%;">001010101010</span>
-            <span style="left: 70%;">101010101011</span>
-            <span style="left: 90%;">010010101001</span>
+
+    <h1>โครงการ: Apache2 vs Nginx Reverse Proxy และ Load Balancer</h1>
+
+    <div class="section">
+        <h2>เป้าหมายของโครงการ</h2>
+        <ul>
+            <li><strong>พัฒนาระบบเว็บเซิร์ฟเวอร์ให้มีประสิทธิภาพสูงสุด</strong><br>มุ่งเน้นการปรับปรุงประสิทธิภาพและการตอบสนองต่อคำขอจำนวนมากจากผู้ใช้งาน</li>
+            <li><strong>สร้างระบบที่รองรับปริมาณการใช้งานได้อย่างเสถียร</strong><br>ออกแบบโครงสร้างระบบให้สามารถรองรับการทำงานที่มีผู้ใช้จำนวนมากโดยไม่ลดทอนความเสถียร</li>
+            <li><strong>เพิ่มความปลอดภัยและความยืดหยุ่นของระบบ</strong><br>ใช้การแยกบทบาทของเซิร์ฟเวอร์เพื่อเพิ่มความปลอดภัยและลดความซับซ้อนในการจัดการ</li>
+            <li><strong>ติดตั้งและปรับแต่ง Apache2 เป็น Reverse Proxy และ Nginx เป็น Load Balancer</strong><br>กระจายโหลดไปยังเซิร์ฟเวอร์ Backend หลายเครื่องเพื่อเพิ่มประสิทธิภาพ</li>
+            <li><strong>สร้างความร่วมมือระหว่าง Nginx, Apache, และ MySQL</strong><br>ตั้งค่าให้ระบบทั้งสามสามารถทำงานร่วมกันได้อย่างราบรื่นและเหมาะสมต่อความต้องการ</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>การติดตั้ง</h2>
+        <h3>เครื่อง "rp" (192.168.86.10)</h3>
+        <p><strong>ซอฟต์แวร์ที่ติดตั้ง:</strong> Apache2, MySQL Client</p>
+        <p><strong>หน้าที่:</strong> ทำหน้าที่เป็น Reverse Proxy</p>
+
+        <h3>เครื่อง "lb" (192.168.86.11)</h3>
+        <p><strong>ซอฟต์แวร์ที่ติดตั้ง:</strong> Nginx</p>
+        <p><strong>หน้าที่:</strong> ทำหน้าที่เป็น Load Balancer</p>
+
+        <h3>เครื่อง "backend-web" (192.168.86.12)</h3>
+        <p><strong>ซอฟต์แวร์ที่ติดตั้ง:</strong> Apache2, PHP-FPM</p>
+        <p><strong>หน้าที่:</strong> เป็น Backend Server สำหรับบริการเว็บ</p>
+
+        <h3>เครื่อง "backend-app" (192.168.86.13)</h3>
+        <p><strong>ซอฟต์แวร์ที่ติดตั้ง:</strong> Apache2, PHP-FPM</p>
+        <p><strong>หน้าที่:</strong> เป็น Backend Server สำหรับบริการแอปพลิเคชัน</p>
+
+        <h3>เครื่อง "backend-data" (192.168.86.14)</h3>
+        <p><strong>ซอฟต์แวร์ที่ติดตั้ง:</strong> MySQL Server</p>
+        <p><strong>หน้าที่:</strong> เป็นฐานข้อมูลหลักของระบบ</p>
+    </div>
+
+    <div class="section">
+        <h2>การติดตั้งและตั้งค่าบริการสำหรับแต่ละ VM</h2>
+
+        <h3>1. ติดตั้ง MySQL บนเครื่อง backend-data</h3>
+        <div class="important">
+            <pre>
+sudo apt update
+sudo apt install mysql-server -y
+sudo systemctl enable mysql
+sudo systemctl start mysql
+            </pre>
         </div>
     </div>
 
-    <main>
-        <h1>Welcome to the Dev Branch!</h1>
-        <p>"Branches grow, just like ideas in development."</p>
-        <p>Explore more about me: <a href="https://github.com/Zro2HiroCode/" target="_blank">Visit My GitHub Page</a></p>
-    </main>
+    <div class="section">
+        <h2>การตั้งค่าไฟร์วอลล์</h2>
+        <p>เปิดพอร์ตที่จำเป็นสำหรับแต่ละเครื่อง:</p>
+
+        <ul>
+            <li><strong>บนเครื่อง rp และ lb:</strong><br><code>sudo ufw allow 'Apache'</code><br><code>sudo ufw allow 'Nginx Full'</code></li>
+            <li><strong>บนเครื่อง backend-web และ backend-app:</strong><br><code>sudo ufw allow 80</code><br><code>sudo ufw allow 443</code></li>
+            <li><strong>บนเครื่อง backend-data:</strong><br><code>sudo ufw allow 3306</code></li>
+        </ul>
+        
+        <p><strong>เปิดใช้งานไฟร์วอลล์:</strong></p>
+        <div class="important">
+            <pre>
+sudo ufw enable
+            </pre>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Apache2 vs Nginx Reverse Proxy และ Load Balancer</h2>
+        <pre>
++------------------------+
+|    Client Requests     |
++------------------------+
+          |
+          v
++------------------------+
+|    Reverse Proxy       |
+|    (Apache2)           |
+|    (192.168.86.10)     |
++------------------------+
+          |
+          v
++------------------------+
+|    Load Balancer       |
+|    (Nginx)             |
+|    (192.168.86.11)     |
++------------------------+
+          |
+          +-----------------+---------------+
+          |                 |               |     
+          v                 v               v
++----------------+ +----------------+ +----------------+
+|     Backend1   | |    Backend2    | |    Backend3    |
+| (192.168.86.12)| | (192.168.86.13)| | (192.168.86.14)|
++----------------+ +----------------+ +----------------+
+    (Web/App)            (Web/App)          (Web/App)
+     (Apache)             (Apache)           (Apache)
+        </pre>
+    </div>
+
+    <div class="section">
+        <h2>การกำหนดค่าและการแก้ไขไฟล์ระบบ</h2>
+
+        <h3>2. การตั้งค่า Reverse Proxy ด้วย Apache2</h3>
+        <p><strong>แก้ไขไฟล์คอนฟิก Apache2 บน rp เพื่อให้ Apache2 ทำหน้าที่เป็น Reverse Proxy:</strong></p>
+        <div class="important">
+            <pre>
+sudo nano /etc/apache2/sites-available/000-default.conf
+            </pre>
+        </div>
+        <p>เพิ่มส่วนต่อไปนี้ในคอนฟิก Apache2 เพื่อกำหนดให้ Apache2 ส่งคำขอไปยัง Nginx:</p>
+        <pre>
+<VirtualHost *:80>
+    ServerAdmin webmaster@localhost
+
+    ProxyPreserveHost On
+
+    # Define a load balancer with proper context
+    <Proxy balancer://mycluster>
+        BalancerMember http://192.168.86.11:80
+        ProxySet lbmethod=byrequests
+    </Proxy>
+
+    # Proxy settings to redirect traffic to the balancer
+    ProxyPass / balancer://mycluster/
+    ProxyPassReverse / balancer://mycluster/
+
+    # Logging settings
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+        </pre>
+        <p>เปิดใช้งานโมดูล <code>mod_proxy</code> และ <code>mod_proxy_http</code>:</p>
+        <pre>
+sudo a2enmod proxy
+sudo a2enmod proxy_http
+        </pre>
+        <p>จากนั้นรีโหลด Apache2:</p>
+        <pre>
+sudo systemctl restart apache2
+        </pre>
+    </div>
+
+    <div class="section">
+        <h3>3. การตั้งค่า Load Balancer ด้วย Nginx</h3>
+        <p><strong>แก้ไขไฟล์คอนฟิก Nginx บน lb:</strong></p>
+        <div class="important">
+            <pre>
+sudo nano /etc/nginx/sites-available/default
+            </pre>
+        </div>
+        <p>เพิ่มการตั้งค่า <code>upstream</code> สำหรับ Load Balancer:</p>
+        <pre>
+upstream backend {
+    server 192.168.86.12;
+    server 192.168.86.13;
+    server 192.168.86.14;
+}
+
+server {
+    listen 80;
+
+    location / {
+        proxy_pass http://backend;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        try_files $uri $uri/ =404;
+
+    }
+    
+    # Custom 404 error page
+    error_page 404 /custom_404.html;
+
+    location = /custom_404.html {
+        root /var/www/html;
+        internal;  # Prevent direct access to the error page URL
+    }
+}
+
+<div class="section">
+        <h2>ทดสอบการตั้งค่า Nginx:</h2>
+        <pre>sudo nginx -t</pre>
+        <h2>รีโหลด Nginx:</h2>
+        <pre>sudo systemctl reload nginx</pre>
+    </div>
+
+    <div class="section">
+        <h2>การตรวจสอบการทำงาน</h2>
+
+        <ul>
+            <li><span class="important">ตรวจสอบสถานะของ Apache2:</span>
+                <pre>sudo systemctl status apache2</pre>
+            </li>
+            <li><span class="important">ตรวจสอบสถานะของ Nginx:</span>
+                <pre>sudo systemctl status nginx</pre>
+            </li>
+            <li><span class="important">ทดสอบการเข้าถึง MySQL จากเครื่อง "rp" ไปยัง "backend-data":</span>
+                <pre>mysql -u tcs -p -h 192.168.86.14</pre>
+            </li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>สรุป</h2>
+        <p>การตั้งค่าดังกล่าวจะช่วยให้ Apache2 ทำหน้าที่เป็น Reverse Proxy ส่งคำขอไปยัง Nginx ที่ทำหน้าที่เป็น Load Balancer และ Nginx จะกระจายคำขอไปยัง Backend Servers ได้อย่างมีประสิทธิภาพและเสถียรภาพสูงสุด.</p>
+    </div>
+
+    <div class="section">
+        <h2>การตั้งค่าเพิ่มเติม (หากจำเป็น)</h2>
+        <ul>
+            <li><span class="important">เพิ่มการตรวจสอบสถานะเซิร์ฟเวอร์</span> เพื่อให้แน่ใจว่าเซิร์ฟเวอร์ Backend สามารถตอบสนองคำขอได้ตลอดเวลา โดยสามารถใช้เครื่องมือเช่น Nagios หรือ Zabbix สำหรับการมอนิเตอร์ระบบ</li>
+            <li><span class="important">เพิ่มการตั้งค่า SSL</span> เพื่อให้การสื่อสารระหว่างไคลเอนต์และเซิร์ฟเวอร์ปลอดภัยมากยิ่งขึ้น</li>
+            <li><span class="important">ปรับปรุงการตั้งค่าความปลอดภัยของฐานข้อมูล</span> เช่น การตั้งค่าการเข้าถึง MySQL ด้วยผู้ใช้ที่มีสิทธิ์จำกัด</li>
+            <li><span class="important">สำรองข้อมูล</span> ให้สม่ำเสมอเพื่อป้องกันข้อมูลสูญหายและเพิ่มความสามารถในการกู้คืนระบบในกรณีที่เกิดเหตุไม่คาดคิด</li>
+        </ul>
+    </div>
+
 </body>
 </html>
