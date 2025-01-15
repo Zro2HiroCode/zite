@@ -1,136 +1,355 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>การตั้งค่า Nginx และ Apache2</title>
+    <title>Nginx Reverse Proxy and Load Balancer Project</title>
     <style>
-        /* ลดระยะห่างระหว่างบรรทัดและองค์ประกอบต่าง ๆ */
         body {
             font-family: Arial, sans-serif;
-            line-height: 1.4;
-            margin: 0;
-            padding: 0;
+            margin: 20px;
+            line-height: 1.6;
         }
-
-        .section {
-            margin-bottom: 10px; /* เพิ่มระยะห่างระหว่าง section */
-            padding: 5px;
-        }
-
-        h2 {
-            margin-top: 0;
-            margin-bottom: 5px; /* ลดระยะห่างใต้ h2 */
-            font-size: 1.5rem;
+        h1, h2, h3 {
             color: #333;
         }
-
         pre {
-            margin-top: 0;
-            margin-bottom: 10px; /* เพิ่มระยะห่างระหว่างคำสั่ง */
-            padding: 10px;
             background-color: #f4f4f4;
-            font-family: monospace;
-            white-space: pre-wrap; /* แสดงข้อความใน pre ตามบรรทัด */
-            border-radius: 5px;
-            line-height: 1.4; /* ปรับระยะห่างระหว่างบรรทัดใน pre */
+            padding: 10px;
+            border: 1px solid #ddd;
+            overflow: auto;
         }
-
-        ul {
-            margin-top: 0;
-            padding-left: 20px;
-            list-style-type: disc;
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 4px;
+            border: 1px solid #ddd;
         }
-
-        li {
-            margin-bottom: 5px; /* ลดระยะห่างระหว่างรายการใน ul */
-        }
-
-        .important {
-            font-weight: bold;
-            color: #d9534f; /* เปลี่ยนสีให้เน้นข้อความที่สำคัญ */
-        }
-
-        p {
-            line-height: 1.5;
-            margin-bottom: 10px; /* เพิ่มระยะห่างหลังข้อความ */
-        }
-      
     </style>
 </head>
 <body>
+    <h1>Nginx Reverse Proxy and Load Balancer Project</h1>
+    <h2>Project Goals</h2>
+    <p>The goal of this project is to develop and enhance the performance of the web server system to achieve maximum efficiency.</p>
+    <p>Create a system that can handle a large number of user requests with stability.</p>
+    <p>Increase security and flexibility of the system through role separation of each server.</p>
+    <p>Use Nginx as a Reverse Proxy and Load Balancer to distribute load to multiple backend servers.</p>
+    <p>Configure and adjust the system to work efficiently together with Nginx, Apache, and MySQL.</p>
 
-    <h1>โครงการ: Apache2 vs Nginx Reverse Proxy และ Load Balancer</h1>
+    <h2>Basic Information and Equipment</h2>
+    <p>The following machines are used to support the system testing:</p>
+    <ul>
+        <li><strong>rplb (192.168.86.11)</strong>: Acts as Reverse Proxy and Load Balancer.</li>
+        <li><strong>backend-web (192.168.86.12)</strong>: Backend Server for web services.</li>
+        <li><strong>backend-app (192.168.86.13)</strong>: Backend Server for application services.</li>
+        <li><strong>backend-data (192.168.86.14)</strong>: Main database of the system.</li>
+    </ul>
 
-    <div class="section">
-        <h2>เป้าหมายของโครงการ</h2>
-        <ul>
-            <li><strong>พัฒนาระบบเว็บเซิร์ฟเวอร์ให้มีประสิทธิภาพสูงสุด</strong><br>มุ่งเน้นการปรับปรุงประสิทธิภาพและการตอบสนองต่อคำขอจำนวนมากจากผู้ใช้งาน</li>
-            <li><strong>สร้างระบบที่รองรับปริมาณการใช้งานได้อย่างเสถียร</strong><br>ออกแบบโครงสร้างระบบให้สามารถรองรับการทำงานที่มีผู้ใช้จำนวนมากโดยไม่ลดทอนความเสถียร</li>
-            <li><strong>เพิ่มความปลอดภัยและความยืดหยุ่นของระบบ</strong><br>ใช้การแยกบทบาทของเซิร์ฟเวอร์เพื่อเพิ่มความปลอดภัยและลดความซับซ้อนในการจัดการ</li>
-            <li><strong>ติดตั้งและปรับแต่ง Apache2 เป็น Reverse Proxy และ Nginx เป็น Load Balancer</strong><br>กระจายโหลดไปยังเซิร์ฟเวอร์ Backend หลายเครื่องเพื่อเพิ่มประสิทธิภาพ</li>
-            <li><strong>สร้างความร่วมมือระหว่าง Nginx, Apache, และ MySQL</strong><br>ตั้งค่าให้ระบบทั้งสามสามารถทำงานร่วมกันได้อย่างราบรื่นและเหมาะสมต่อความต้องการ</li>
-        </ul>
-    </div>
+    <h2>Service Installation and Configuration for Each VM</h2>
+    <h3>rplb (192.168.86.11)</h3>
+    <h4>Install Nginx:</h4>
+    <pre>
+sudo apt update
+sudo apt install nginx -y
+sudo systemctl enable nginx
+sudo systemctl start nginx
+    </pre>
+    <h4>Install MySQL Client:</h4>
+    <pre>
+sudo apt update
+sudo apt install mysql-client
+mysql --version
+    </pre>
 
-    <div class="section">
-        <h2>การติดตั้ง</h2>
-        <h3>เครื่อง "rp" (192.168.86.10)</h3>
-        <p><strong>ซอฟต์แวร์ที่ติดตั้ง:</strong> Apache2, MySQL Client</p>
-        <p><strong>หน้าที่:</strong> ทำหน้าที่เป็น Reverse Proxy</p>
+    <h3>backend-web (192.168.86.12)</h3>
+    <h4>Install Apache2 and PHP-FPM:</h4>
+    <pre>
+sudo apt update
+sudo apt install apache2 php-fpm -y
+sudo systemctl enable apache2
+sudo systemctl start apache2
+    </pre>
+    <h4>Configure apache2.conf or 000-default.conf:</h4>
+    <p>Add settings related to Virtual Hosts to configure data reception from Nginx to Apache2.</p>
+    <p>Ensure ServerName and DocumentRoot are set correctly.</p>
+    <h4>Enable necessary modules like mod_rewrite for URL rewriting:</h4>
+    <pre>
+sudo a2enmod rewrite
+sudo systemctl restart apache2
+    </pre>
 
-        <h3>เครื่อง "lb" (192.168.86.11)</h3>
-        <p><strong>ซอฟต์แวร์ที่ติดตั้ง:</strong> Nginx</p>
-        <p><strong>หน้าที่:</strong> ทำหน้าที่เป็น Load Balancer</p>
+    <h3>backend-app (192.168.86.13)</h3>
+    <h4>Install Apache2 and PHP-FPM:</h4>
+    <pre>
+sudo apt update
+sudo apt install apache2 php-fpm -y
+sudo systemctl enable apache2
+sudo systemctl start apache2
+    </pre>
+    <h4>Configure apache2.conf or 000-default.conf:</h4>
+    <p>Add settings related to Virtual Hosts to configure data reception from Nginx to Apache2.</p>
+    <p>Ensure ServerName and DocumentRoot are set correctly.</p>
+    <h4>Enable necessary modules like mod_rewrite for URL rewriting:</h4>
+    <pre>
+sudo a2enmod rewrite
+sudo systemctl restart apache2
+    </pre>
 
-        <h3>เครื่อง "backend-web" (192.168.86.12)</h3>
-        <p><strong>ซอฟต์แวร์ที่ติดตั้ง:</strong> Apache2, PHP-FPM</p>
-        <p><strong>หน้าที่:</strong> เป็น Backend Server สำหรับบริการเว็บ</p>
-
-        <h3>เครื่อง "backend-app" (192.168.86.13)</h3>
-        <p><strong>ซอฟต์แวร์ที่ติดตั้ง:</strong> Apache2, PHP-FPM</p>
-        <p><strong>หน้าที่:</strong> เป็น Backend Server สำหรับบริการแอปพลิเคชัน</p>
-
-        <h3>เครื่อง "backend-data" (192.168.86.14)</h3>
-        <p><strong>ซอฟต์แวร์ที่ติดตั้ง:</strong> MySQL Server</p>
-        <p><strong>หน้าที่:</strong> เป็นฐานข้อมูลหลักของระบบ</p>
-    </div>
-
-    <div class="section">
-        <h2>การติดตั้งและตั้งค่าบริการสำหรับแต่ละ VM</h2>
-
-        <h3>1. ติดตั้ง MySQL บนเครื่อง backend-data</h3>
-        <div class="important">
-            <pre>
+    <h3>backend-data (192.168.86.14)</h3>
+    <h4>Install MySQL Server:</h4>
+    <pre>
 sudo apt update
 sudo apt install mysql-server -y
 sudo systemctl enable mysql
 sudo systemctl start mysql
-            </pre>
-        </div>
-    </div>
+    </pre>
+    <h4>Check MySQL Service status:</h4>
+    <pre>
+sudo systemctl status mysql
+    </pre>
+    <h4>Secure MySQL installation:</h4>
+    <pre>
+sudo mysql_secure_installation
+    </pre>
+    <h4>Enter MySQL shell:</h4>
+    <pre>
+sudo mysql หรือ sudo mysql -u root -p
+    </pre>
+    <h4>Grant privileges to MySQL user:</h4>
+    <pre>
+CREATE USER 'tcs'@'%' IDENTIFIED BY 'pwd@1234';
+GRANT ALL PRIVILEGES ON *.* TO 'tcs'@'%' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+    </pre>
 
-    <div class="section">
-        <h2>การตั้งค่าไฟร์วอลล์</h2>
-        <p>เปิดพอร์ตที่จำเป็นสำหรับแต่ละเครื่อง:</p>
-
-        <ul>
-            <li><strong>บนเครื่อง rp และ lb:</strong><br><code>sudo ufw allow 'Apache'</code><br><code>sudo ufw allow 'Nginx Full'</code></li>
-            <li><strong>บนเครื่อง backend-web และ backend-app:</strong><br><code>sudo ufw allow 80</code><br><code>sudo ufw allow 443</code></li>
-            <li><strong>บนเครื่อง backend-data:</strong><br><code>sudo ufw allow 3306</code></li>
-        </ul>
-        
-        <p><strong>เปิดใช้งานไฟร์วอลล์:</strong></p>
-        <div class="important">
-            <pre>
+    <h2>Firewall Settings</h2>
+    <p>Open necessary ports on each machine:</p>
+    <h3>On rplb (192.168.86.11):</h3>
+    <pre>
+sudo ufw allow 'Nginx Full'
+    </pre>
+    <h3>On backend-web and backend-app (192.168.86.12, 192.168.86.13):</h3>
+    <pre>
+sudo ufw allow 80
+sudo ufw allow 443
+    </pre>
+    <h3>On backend-data (192.168.86.14):</h3>
+    <pre>
+sudo ufw allow 3306
+    </pre>
+    <h4>Enable firewall:</h4>
+    <pre>
 sudo ufw enable
-            </pre>
-        </div>
-    </div>
+    </pre>
 
-    <div class="section">
-        <h2>Apache2 vs Nginx Reverse Proxy และ Load Balancer</h2>
-        <pre>
+    <h2>System Architecture Diagram</h2>
+    <pre>
++------------------------+
+|    Client Requests     |
++------------------------+
+          |
+          v
++------------------------+
+|    Reverse Proxy &     |
+|    Load Balancer       |
+|    (192.168.86.11)     |
++------------------------+
+          |
+          +-----------------+---------------+
+          |                 |               |
+          v                 v               v
++----------------+ +----------------+ +----------------+
+|     Backend1   | |    Backend2    | |    Backend3    |
+| (192.168.86.12)| | (192.168.86.13)| | (192.168.86.14)|
++----------------+ +----------------+ +----------------+
+    (Web/App)            (Web/App)          (Web/App)
+     (Apache)             (Apache)           (Apache)
+    </pre>
+
+    <h2>Configuration and File Editing</h2>
+    <h3>Manage "default.conf" file on Nginx on rplb</h3>
+    <h4>Add "upstream backend {...}" settings for Load Balancer:</h4>
+    <pre>
+upstream backend {
+    server 192.168.86.12;  # IP of backend-web
+    server 192.168.86.13;  # IP of backend-app
+}
+    </pre>
+    <h4>Add "proxy_pass http://backend;" settings for Reverse Proxy:</h4>
+    <pre>
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+
+    root /var/www/html;
+    index index.html index.htm;
+
+    location / {
+        proxy_pass http://backend;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+
+        try_files \$uri \$uri/ =404;
+    }
+
+    error_page 404 /custom_404.html;
+    location = /custom_404.html {
+        root /var/www/html;
+    }
+}
+    </pre>
+
+    <h2>Verification</h2>
+    <h3>Check Nginx status:</h3>
+    <pre>
+sudo systemctl status nginx
+    </pre>
+    <h3>Check MySQL access:</h3>
+    <pre>
+mysql -u tcs -p -h 192.168.86.14
+    </pre>
+
+    <h2>Summary</h2>
+    <p>Reverse Proxy: Acts as an intermediary to receive requests from clients and forward them to backend servers.</p>
+    <p>Load Balancer: Nginx will distribute requests to backend servers to enhance performance.</p>
+    <p>Firewall: Open necessary ports for related services on each machine.</p>
+    <p>Verification: Use "systemctl" commands and connection tests to ensure the system is functioning properly.</p>
+
+    <h2>Project Adjustment: Adding Apache2 as Reverse Proxy</h2>
+    <h3>Project Name: Apache2 vs Nginx Reverse Proxy and Load Balancer</h3>
+    <h2>Project Goals</h2>
+    <p>Develop a web server system with maximum efficiency, focusing on improving performance and response to a large number of user requests.</p>
+    <p>Create a system that supports high usage volume with stability.</p>
+    <p>Increase security and flexibility by separating server roles.</p>
+    <p>Install and configure Apache2 as Reverse Proxy and Nginx as Load Balancer to distribute load to multiple backend servers.</p>
+    <p>Create cooperation between Nginx, Apache, and MySQL to work together smoothly and suitably.</p>
+
+    <h2>Basic Information and Equipment</h2>
+    <p>The following machines are used to support the system testing:</p>
+    <ul>
+        <li><strong>rp (192.168.86.10)</strong>: Acts as Reverse Proxy.</li>
+        <li><strong>lb (192.168.86.11)</strong>: Acts as Load Balancer.</li>
+        <li><strong>backend-web (192.168.86.12)</strong>: Backend Server for web services.</li>
+        <li><strong>backend-app (192.168.86.13)</strong>: Backend Server for application services.</li>
+        <li><strong>backend-data (192.168.86.14)</strong>: Main database of the system.</li>
+    </ul>
+
+    <h2>Tool Installation for Each VM</h2>
+    <h3>rp (192.168.86.10)</h3>
+    <h4>Install Apache2:</h4>
+    <pre>
+sudo apt update
+sudo apt install apache2 -y
+sudo systemctl enable apache2
+sudo systemctl start apache2
+    </pre>
+    <h4>Install MySQL Client:</h4>
+    <pre>
+sudo apt update
+sudo apt install mysql-client
+mysql --version
+    </pre>
+
+    <h3>lb (192.168.86.11)</h3>
+    <h4>Install Nginx:</h4>
+    <pre>
+sudo apt update
+sudo apt install nginx -y
+sudo systemctl enable nginx
+sudo systemctl start nginx
+    </pre>
+    <h4>Install MySQL Client:</h4>
+    <pre>
+sudo apt update
+sudo apt install mysql-client
+mysql --version
+    </pre>
+
+    <h3>backend-web (192.168.86.12)</h3>
+    <h4>Install Apache2 and PHP-FPM:</h4>
+    <pre>
+sudo apt update
+sudo apt install apache2 php-fpm -y
+sudo systemctl enable apache2
+sudo systemctl start apache2
+    </pre>
+    <h4>Configure apache2.conf or 000-default.conf:</h4>
+    <p>Add settings related to Virtual Hosts to configure data reception from Nginx to Apache2.</p>
+    <p>Ensure ServerName and DocumentRoot are set correctly.</p>
+    <h4>Enable necessary modules like mod_rewrite for URL rewriting:</h4>
+    <pre>
+sudo a2enmod rewrite
+sudo systemctl restart apache2
+    </pre>
+
+    <h3>backend-app (192.168.86.13)</h3>
+    <h4>Install Apache2 and PHP-FPM:</h4>
+    <pre>
+sudo apt update
+sudo apt install apache2 php-fpm -y
+sudo systemctl enable apache2
+sudo systemctl start apache2
+    </pre>
+    <h4>Configure apache2.conf or 000-default.conf:</h4>
+    <p>Add settings related to Virtual Hosts to configure data reception from Nginx to Apache2.</p>
+    <p>Ensure ServerName and DocumentRoot are set correctly.</p>
+    <h4>Enable necessary modules like mod_rewrite for URL rewriting:</h4>
+    <pre>
+sudo a2enmod rewrite
+sudo systemctl restart apache2
+    </pre>
+
+    <h3>backend-data (192.168.86.14)</h3>
+    <h4>Install MySQL Server:</h4>
+    <pre>
+sudo apt update
+sudo apt install mysql-server -y
+sudo systemctl enable mysql
+sudo systemctl start mysql
+    </pre>
+    <h4>Check MySQL Service status:</h4>
+    <pre>
+sudo systemctl status mysql
+    </pre>
+    <h4>Secure MySQL installation:</h4>
+    <pre>
+sudo mysql_secure_installation
+    </pre>
+    <h4>Enter MySQL shell:</h4>
+    <pre>
+sudo mysql หรือ sudo mysql -u root -p
+    </pre>
+    <h4>Grant privileges to MySQL user:</h4>
+    <pre>
+CREATE USER 'tcs'@'%' IDENTIFIED BY 'pwd@1234';
+GRANT ALL PRIVILEGES ON *.* TO 'tcs'@'%' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+    </pre>
+
+    <h2>Firewall Settings</h2>
+    <p>Open necessary ports on each machine:</p>
+    <h3>On rp and lb:</h3>
+    <pre>
+sudo ufw allow 'Apache'
+sudo ufw allow 'Nginx Full'
+    </pre>
+    <h3>On backend-web and backend-app:</h3>
+    <pre>
+sudo ufw allow 80
+sudo ufw allow 443
+    </pre>
+    <h3>On backend-data:</h3>
+    <pre>
+sudo ufw allow 3306
+    </pre>
+    <h4>Enable firewall:</h4>
+    <pre>
+sudo ufw enable
+    </pre>
+
+    <h2>System Architecture Diagram</h2>
+    <pre>
 +------------------------+
 |    Client Requests     |
 +------------------------+
@@ -150,7 +369,7 @@ sudo ufw enable
 +------------------------+
           |
           +-----------------+---------------+
-          |                 |               |     
+          |                 |               |
           v                 v               v
 +----------------+ +----------------+ +----------------+
 |     Backend1   | |    Backend2    | |    Backend3    |
@@ -158,21 +377,16 @@ sudo ufw enable
 +----------------+ +----------------+ +----------------+
     (Web/App)            (Web/App)          (Web/App)
      (Apache)             (Apache)           (Apache)
-        </pre>
-    </div>
+    </pre>
 
-    <div class="section">
-        <h2>การกำหนดค่าและการแก้ไขไฟล์ระบบ</h2>
-
-        <h3>2. การตั้งค่า Reverse Proxy ด้วย Apache2</h3>
-        <p><strong>แก้ไขไฟล์คอนฟิก Apache2 บน rp เพื่อให้ Apache2 ทำหน้าที่เป็น Reverse Proxy:</strong></p>
-        <div class="important">
-            <pre>
+    <h2>Configuration and File Editing</h2>
+    <h3>Reverse Proxy Configuration</h3>
+    <h4>Edit Apache2 config file on rp to set Apache2 as Reverse Proxy:</h4>
+    <pre>
 sudo nano /etc/apache2/sites-available/000-default.conf
-            </pre>
-        </div>
-        <p>เพิ่มส่วนต่อไปนี้ในคอนฟิก Apache2 เพื่อกำหนดให้ Apache2 ส่งคำขอไปยัง Nginx:</p>
-        <pre>
+    </pre>
+    <h4>Add the following to Apache2 config to set Apache2 to send requests to Nginx:</h4>
+    <pre>
 <VirtualHost *:80>
     ServerAdmin webmaster@localhost
 
@@ -189,51 +403,50 @@ sudo nano /etc/apache2/sites-available/000-default.conf
     ProxyPassReverse / balancer://mycluster/
 
     # Logging settings
-    ErrorLog ${APACHE_LOG_DIR}/error.log
-    CustomLog ${APACHE_LOG_DIR}/access.log combined
+    ErrorLog \${APACHE_LOG_DIR}/error.log
+    CustomLog \${APACHE_LOG_DIR}/access.log combined
 </VirtualHost>
-        </pre>
-        <p>เปิดใช้งานโมดูล <code>mod_proxy</code> และ <code>mod_proxy_http</code>:</p>
-        <pre>
+    </pre>
+    <h4>Enable mod_proxy and mod_proxy_http modules:</h4>
+    <pre>
 sudo a2enmod proxy
 sudo a2enmod proxy_http
-        </pre>
-        <p>จากนั้นรีโหลด Apache2:</p>
-        <pre>
+    </pre>
+    <h4>Reload Apache2:</h4>
+    <pre>
 sudo systemctl restart apache2
-        </pre>
-    </div>
+    </pre>
 
-    <div class="section">
-        <h3>3. การตั้งค่า Load Balancer ด้วย Nginx</h3>
-        <p><strong>แก้ไขไฟล์คอนฟิก Nginx บน lb:</strong></p>
-        <div class="important">
-            <pre>
+    <h3>Load Balancer Configuration</h3>
+    <h4>Edit Nginx config file on lb to set Nginx as Load Balancer:</h4>
+    <pre>
 sudo nano /etc/nginx/sites-available/default
-            </pre>
-        </div>
-        <p>เพิ่มการตั้งค่า <code>upstream</code> สำหรับ Load Balancer:</p>
-        <pre>
+    </pre>
+    <h4>Add upstream settings for Load Balancer:</h4>
+    <pre>
 upstream backend {
-    server 192.168.86.12;
-    server 192.168.86.13;
-    server 192.168.86.14;
+    server 192.168.86.12;  # IP of server (Apache2)
+    server 192.168.86.13;  # IP of server (Apache2)
+    server 192.168.86.14;  # IP of server (Apache2)
 }
 
 server {
-    listen 80;
+    listen 80 default_server;
+    listen [::]:80 default_server;
+
+    root /var/www/html;
+    index index.html index.htm;
 
     location / {
         proxy_pass http://backend;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
 
-        try_files $uri $uri/ =404;
-
+        try_files \$uri \$uri/ =404;
     }
-    
+
     # Custom 404 error page
     error_page 404 /custom_404.html;
 
@@ -242,47 +455,37 @@ server {
         internal;  # Prevent direct access to the error page URL
     }
 }
-
-    <!-- เนื้อหาของเว็บไซต์ -->
-    <div class="section">
-        <h2>ทดสอบการตั้งค่า Nginx</h2>
-        
+    </pre>
+    <h4>Test Nginx configuration:</h4>
+    <pre>
 sudo nginx -t
-        
-        <h2>รีโหลด Nginx</h2>
-        
+    </pre>
+    <h4>Reload Nginx:</h4>
+    <pre>
 sudo systemctl reload nginx
-        
-    </div>
+    </pre>
 
-    <div class="section">
-        <h2>การตรวจสอบการทำงาน</h2>
-        <ul>
-            <li>ตรวจสอบสถานะของ Apache2:
-                <pre>sudo systemctl status apache2</pre>
-            </li>
-            <li>ตรวจสอบสถานะของ Nginx:
-                <pre>sudo systemctl status nginx</pre>
-            </li>
-            <li>ทดสอบการเข้าถึง MySQL จากเครื่อง "rp" ไปยัง "backend-data":
-                <pre>mysql -u tcs -p -h 192.168.86.14</pre>
-            </li>
-        </ul>
-    </div>
+    <h2>Verification</h2>
+    <h3>Check Apache2 status:</h3>
+    <pre>
+sudo systemctl status apache2
+    </pre>
+    <h3>Check Nginx status:</h3>
+    <pre>
+sudo systemctl status nginx
+    </pre>
+    <h3>Test MySQL access from "rp" to "backend-data":</h3>
+    <pre>
+mysql -u tcs -p -h 192.168.86.14
+    </pre>
 
-    <div class="section">
-        <h2>สรุป</h2>
-        <p>การตั้งค่าดังกล่าวจะช่วยให้ Apache2 ทำหน้าที่เป็น Reverse Proxy ส่งคำขอไปยัง Nginx ที่ทำหน้าที่เป็น Load Balancer และ Nginx จะกระจายคำขอไปยัง Backend Servers ได้อย่างมีประสิทธิภาพและเสถียรภาพสูงสุด.</p>
-    </div>
+    <h2>Summary</h2>
+    <p>The above configuration will allow Apache2 to act as a Reverse Proxy, forwarding requests to Nginx, which acts as a Load Balancer. Nginx will then distribute requests to the Backend Servers efficiently and with high stability.</p>
 
-    <div class="section">
-        <h2>การตั้งค่าเพิ่มเติม (หากจำเป็น)</h2>
-        <ul>
-            <li>เพิ่มการตรวจสอบสถานะเซิร์ฟเวอร์ เพื่อให้แน่ใจว่าเซิร์ฟเวอร์ Backend สามารถตอบสนองคำขอได้ตลอดเวลา โดยสามารถใช้เครื่องมือเช่น Nagios หรือ Zabbix สำหรับการมอนิเตอร์ระบบ</li>
-            <li>เพิ่มการตั้งค่า SSL เพื่อให้การสื่อสารระหว่างไคลเอนต์ และเซิร์ฟเวอร์ปลอดภัยมากยิ่งขึ้น</li>
-            <li>ปรับปรุงการตั้งค่าความปลอดภัยของฐานข้อมูล เช่น การตั้งค่าการเข้าถึง MySQL ด้วยผู้ใช้ที่มีสิทธิ์จำกัด</li>
-            <li>สำรองข้อมูลให้สม่ำเสมอเพื่อป้องกันข้อมูลสูญหาย และเพิ่มความสามารถในการกู้คืนระบบ ในกรณีที่เกิดเหตุไม่คาดคิด</li>
-        </ul>
-    </div>
+    <h2>Additional Configurations (If Necessary)</h2>
+    <p>Add server status checks to ensure backend servers can respond to requests at all times. Tools like Nagios or Zabbix can be used for system monitoring.</p>
+    <p>Add SSL configuration to enhance security for communication between clients and servers.</p>
+    <p>Improve database security settings, such as setting up MySQL access with users with limited privileges.</p>
+    <p>Regular backups to prevent data loss and enhance system recovery capabilities in case of unexpected events.</p>
 </body>
 </html>
